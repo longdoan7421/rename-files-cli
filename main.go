@@ -60,17 +60,18 @@ func main() {
 		log.Println("Running in dry mode")
 	}
 
+	var err error
+	*pathFlag, err = filepath.Abs(*pathFlag)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	isDir, err := utils.IsDirectory(*pathFlag)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if isDir {
-		*pathFlag, err = filepath.Abs(*pathFlag)
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		log.Printf(`Reading files in "%s"`, colorYellow+(*pathFlag)+colorReset)
 		err := filepath.Walk(*pathFlag,
 			func(path string, info os.FileInfo, err error) error {
@@ -78,7 +79,7 @@ func main() {
 					return err
 				}
 
-				if info.IsDir() && path != "." {
+				if info.IsDir() {
 					if depth := calculateDepthOfChildDirectory(*pathFlag, path); depth > *depthFlag {
 						return filepath.SkipDir
 					}
