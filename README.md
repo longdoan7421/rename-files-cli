@@ -21,3 +21,6 @@ Check helps to see supporting flags and more detail.
 ```bash
 rename-files -h
 ```
+
+## License
+GNU GPLv3. See the [LICENSE](./LICENSE) file for details.
