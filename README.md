@@ -1,10 +1,13 @@
 # Rename Files
 
+A personal command line tool for renaming files to conventional formats, e.g. title case, snake case, kebab case, ...
+
 ## Build
 
 ```bash
 go build -ldflags "-s -w" -o rename-files main.go
 ```
+*Note: have been tested with go@1.16 and above only.*
 
 ## Usage
 
