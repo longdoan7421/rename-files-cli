@@ -11,6 +11,8 @@ import (
 )
 
 var supportedCaseTypes = []string{"title", "pascal", "camel", "snake", "kebab", "pascal-snake", "pascal-kebab"}
+
+// List of words which won't be capitalized in title case (based on APA rule)
 var smallWords = []string{"a", "an", "the", "and", "as", "but", "for", "if", "nor", "or", "so", "yet", "at", "by", "for", "in", "of", "off", "on", "per", "to", "up", "via"}
 
 /* Flag Usages */
@@ -21,7 +23,7 @@ var depthUsage = `If path is a directory, all files which is within the depth wi
 var caseTypeUsage = `The case type which file will be renamed to. (required)
 
 Support types:
-	* title: This is an Example
+	* title: This Is an Example (based on APA rule)
 	* pascal: ThisIsAnExample
 	* camel: thisIsAnExample
 	* snake: this_is_an_example
@@ -46,7 +48,6 @@ var colorWhite = "\033[37m"
 /* End Colors */
 
 func main() {
-
 	var pathFlag *string = flag.String("path", "", pathUsage)
 	var depthFlag *int = flag.Int("depth", 10, depthUsage)
 	var caseTypeFlag *string = flag.String("case", "", caseTypeUsage)
@@ -54,7 +55,9 @@ func main() {
 	var keepUpperPartFlag *bool = flag.Bool("keep-upper", false, keepUpperUsage)
 	flag.Parse()
 
-	validateFlags(*pathFlag, *caseTypeFlag, *depthFlag)
+	if isValid, errMsg := validateFlags(*pathFlag, *caseTypeFlag, *depthFlag); !isValid {
+		log.Fatal(errMsg)
+	}
 
 	if *dryRunFlag {
 		log.Println("Running in dry mode")
@@ -76,6 +79,7 @@ func main() {
 		err := filepath.Walk(*pathFlag,
 			func(path string, info os.FileInfo, err error) error {
 				if err != nil {
+					log.Printf("Error during walking: %v", err)
 					return err
 				}
 
@@ -100,25 +104,27 @@ func main() {
 				return nil
 			})
 		if err != nil {
-			log.Println(err)
+			log.Printf("Error after walking: %v", err)
 		}
 	} else {
 		renameFile(*pathFlag, *caseTypeFlag, *dryRunFlag, *keepUpperPartFlag)
 	}
 }
 
-func validateFlags(path string, caseType string, depth int) {
+func validateFlags(path string, caseType string, depth int) (bool, string) {
 	path = strings.TrimSpace(path)
 	caseType = strings.TrimSpace(caseType)
 
 	switch {
 	case path == "":
-		log.Fatal("Invalid path")
+		return false, "Missing path"
 	case !utils.Contains(supportedCaseTypes, caseType):
-		log.Fatal("Invalid case type")
+		return false, "Invalid case"
 	case depth < 1:
-		log.Fatal("Depth needs to be positive number")
+		return false, "Depth needs to be positive number"
 	}
+
+	return true, ""
 }
 
 func calculateDepthOfChildDirectory(root string, dir string) int {
