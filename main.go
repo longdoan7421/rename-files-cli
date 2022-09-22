@@ -16,13 +16,15 @@ var supportedCaseTypes = []string{"title", "pascal", "camel", "snake", "kebab", 
 var smallWords = []string{"a", "an", "the", "and", "as", "but", "for", "if", "nor", "or", "so", "yet", "at", "by", "for", "in", "of", "off", "on", "per", "to", "up", "via"}
 
 /* Flag Usages */
-var pathUsage = `The path to file or directory which has files need to be renamed. (required)
+var pathUsage = `(required) The path to file or directory which has files need to be renamed.
 
 If path is a directory, every files, even files included in sub directory, will also be renamed. Use "-depth" flag to limit the depth.`
-var depthUsage = `If path is a directory, all files which is within the depth will be renamed. Depth is count from 1.`
-var caseTypeUsage = `The case type which file will be renamed to. (required)
 
-Support types:
+var depthUsage = `[optional|default=10] If path is a directory, all files within the directory will be renamed recursively. Depth is count from 1.`
+
+var caseTypeUsage = `(required) The case type which file will be renamed to.
+
+Supported types:
 	* title: This Is an Example (based on APA rule)
 	* pascal: ThisIsAnExample
 	* camel: thisIsAnExample
@@ -30,8 +32,10 @@ Support types:
 	* kebab: this-is-an-example
 	* pascal-snake: This_Is_An_Example
 	* pascal-kebab: This-Is-An-Example`
-var dryRunUsage = `Show filename after renaming, but no files would be renamed.`
-var keepUpperUsage = `The original word which is uppercase will be preserved, e.g. "GO is fun" -> "GO-is-fun".`
+
+var dryRunUsage = `[optional|default=false] Show filename after renaming, but no files would be renamed.`
+
+var keepUpperUsage = `[optional|default=true] The original word which is uppercase will be preserved, e.g. "GO is fun" -> "GO-is-fun".`
 
 /* End Flag Usages */
 
@@ -52,7 +56,7 @@ func main() {
 	var depthFlag *int = flag.Int("depth", 10, depthUsage)
 	var caseTypeFlag *string = flag.String("case", "", caseTypeUsage)
 	var dryRunFlag *bool = flag.Bool("dry-run", false, dryRunUsage)
-	var keepUpperPartFlag *bool = flag.Bool("keep-upper", false, keepUpperUsage)
+	var keepUpperPartFlag *bool = flag.Bool("keep-upper", true, keepUpperUsage)
 	flag.Parse()
 
 	if isValid, errMsg := validateFlags(*pathFlag, *caseTypeFlag, *depthFlag); !isValid {
